@@ -15,6 +15,8 @@ export function predictPatientRisk(vitals: PatientVitals): TriageResult {
 
   if (respiratoryRisk) { score += 0.25; flags.push('Respiratory risk: Fever + Cough + Breathlessness'); }
   if (preeclampsiaRisk) { score += 0.3; flags.push('Preeclampsia risk: High BP during pregnancy'); }
+  if (vitals.hemoglobin != null && vitals.hemoglobin < 10) { score += 0.15; flags.push('Anemia: Hemoglobin < 10 g/dL'); }
+  if (vitals.pregnancyStatus && vitals.swelling && vitals.severeHeadache && vitals.systolicBP > 140) { score += 0.35; flags.push('Possible preeclampsia: Swelling + Headache + High BP'); }
   if (diabeticEmergency) { score += 0.25; flags.push('Diabetic emergency: Blood sugar > 300 mg/dL'); }
   if (chronicFlag) { score += 0.1; flags.push('Chronic symptoms: Duration > 3 days'); }
 

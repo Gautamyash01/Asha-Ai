@@ -12,6 +12,10 @@ export interface PatientVitals {
   symptoms: string[];
   symptomDuration: number;
   freeTextSymptoms?: string;
+  hemoglobin?: number;
+  trimester?: 1 | 2 | 3;
+  swelling?: boolean;
+  severeHeadache?: boolean;
 }
 
 export interface TriageResult {

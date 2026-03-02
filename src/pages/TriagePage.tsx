@@ -91,6 +91,32 @@ export default function TriagePage() {
 
           <hr className="border-border" />
 
+          {/* Maternal Health (when pregnant) */}
+          {vitals.pregnancyStatus && (
+            <>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Maternal Health</p>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-5">
+                  <div className="space-y-2"><Label>Hemoglobin (g/dL)</Label><Input type="number" step="0.1" value={vitals.hemoglobin ?? ''} onChange={e => setVitals(v => ({ ...v, hemoglobin: e.target.value ? +e.target.value : undefined }))} placeholder="e.g. 11" /></div>
+                  <div className="space-y-2"><Label>Trimester</Label>
+                    <select className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm" value={vitals.trimester ?? ''} onChange={e => setVitals(v => ({ ...v, trimester: e.target.value ? +e.target.value as 1|2|3 : undefined }))}>
+                      <option value="">Select</option><option value="1">1st</option><option value="2">2nd</option><option value="3">3rd</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center gap-3 col-span-2">
+                    <Checkbox checked={vitals.swelling ?? false} onCheckedChange={c => setVitals(v => ({ ...v, swelling: !!c }))} />
+                    <Label>Swelling</Label>
+                  </div>
+                  <div className="flex items-center gap-3 col-span-2">
+                    <Checkbox checked={vitals.severeHeadache ?? false} onCheckedChange={c => setVitals(v => ({ ...v, severeHeadache: !!c }))} />
+                    <Label>Severe headache</Label>
+                  </div>
+                </div>
+              </div>
+              <hr className="border-border" />
+            </>
+          )}
+
           {/* Symptoms */}
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Symptoms</p>
@@ -137,12 +163,12 @@ export default function TriagePage() {
                 </div>
               </div>
 
-              {/* Explanation */}
+              {/* ASHA-Friendly: Reason + Recommended Action */}
               <div className="bg-card rounded-xl p-6 shadow-card border border-border">
-                <h3 className="font-display font-semibold text-foreground mb-3">Why this risk level?</h3>
+                <h3 className="font-display font-semibold text-foreground mb-3">Reason</h3>
                 {result.explanation.length > 0 ? (
                   <ul className="space-y-2">
-                    {result.explanation.map((e, i) => (
+                    {result.explanation.slice(0, 3).map((e, i) => (
                       <li key={i} className="flex items-start gap-2 text-sm text-foreground">
                         <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-destructive shrink-0" />
                         {e}
@@ -150,6 +176,25 @@ export default function TriagePage() {
                     ))}
                   </ul>
                 ) : <p className="text-sm text-muted-foreground">No significant risk factors detected.</p>}
+                <h3 className="font-display font-semibold text-foreground mt-4 mb-2">Recommended Action</h3>
+                <p className="text-sm text-foreground">
+                  {result.urgencyCategory === 'red' ? 'Refer to PHC within 6 hours.' : result.urgencyCategory === 'yellow' ? 'Monitor vitals daily. Follow up in 2–3 days.' : 'Home care. Provide ORS if needed. Follow up if symptoms worsen.'}
+                </p>
+                <button
+                  onClick={() => {
+                    const lines = [
+                      '=== PATIENT CASE SUMMARY ===',
+                      `Risk: ${result.urgencyLabel} (${(result.riskProbability * 100).toFixed(0)}%)`,
+                      'Reason:', ...(result.explanation.slice(0, 3).map((e) => `- ${e}`)),
+                      'Recommended Action:', result.urgencyCategory === 'red' ? 'Refer to PHC within 6 hours.' : result.urgencyCategory === 'yellow' ? 'Monitor vitals daily. Follow up in 2–3 days.' : 'Home care.',
+                    ];
+                    navigator.clipboard?.writeText(lines.join('\n'));
+                    alert('Summary copied to clipboard.');
+                  }}
+                  className="mt-3 px-4 py-2 text-sm bg-muted hover:bg-muted/80 rounded-lg"
+                >
+                  Copy Summary for Doctor
+                </button>
               </div>
 
               {/* Feature Importance */}

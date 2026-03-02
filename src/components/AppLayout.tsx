@@ -2,22 +2,20 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Activity, Users, Brain, FileText, AlertTriangle, Truck,
-  ListOrdered, Apple, Network, BarChart3, Clock, Menu, X, Heart
+  Activity, Users, FileText, AlertTriangle, Truck,
+  ListOrdered, BarChart3, Clock, Menu, Heart
 } from 'lucide-react';
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: BarChart3 },
   { path: '/triage', label: 'Patient Triage', icon: Activity },
-  { path: '/diseases', label: 'Disease Classifier', icon: Brain },
   { path: '/nlp', label: 'NLP Symptoms', icon: FileText },
   { path: '/outbreaks', label: 'Outbreak Detection', icon: AlertTriangle },
   { path: '/resources', label: 'Resource Allocation', icon: Truck },
   { path: '/priority', label: 'Patient Priority', icon: ListOrdered },
-  { path: '/malnutrition', label: 'Malnutrition', icon: Apple },
-  { path: '/federated', label: 'Federated Learning', icon: Network },
   { path: '/explainable', label: 'Explainable AI', icon: BarChart3 },
   { path: '/deterioration', label: '48h Prediction', icon: Clock },
+  { path: '/admin', label: 'Admin', icon: BarChart3 },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
