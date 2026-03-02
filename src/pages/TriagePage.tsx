@@ -9,7 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import TriageBadge from '@/components/TriageBadge';
 import { predictPatientRisk, predictDeterioration } from '@/lib/ai-engine';
 import type { PatientVitals, TriageResult, DeteriorationResult } from '@/lib/types';
-import { runBackendTriage } from '@/lib/api';
+import { runBackendTriage, BackendRiskResult } from '@/lib/api';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const symptomOptions = [
@@ -32,7 +32,7 @@ export default function TriagePage() {
   });
   const [result, setResult] = useState<TriageResult | null>(null);
   const [deterioration, setDeterioration] = useState<DeteriorationResult | null>(null);
-  const [backendResult, setBackendResult] = useState<{ level: string; action: string } | null>(null);
+  const [backendResult, setBackendResult] = useState<BackendRiskResult | null>(null);
   const [backendError, setBackendError] = useState<string | null>(null);
   const [isBackendLoading, setIsBackendLoading] = useState(false);
 
@@ -133,7 +133,7 @@ export default function TriagePage() {
         <AnimatePresence>
           {result && (
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-              {/* Risk Score */}
+              {/* Local Risk Score (heuristic) */}
               <div className="bg-card rounded-xl p-6 shadow-card border border-border">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-display font-semibold text-foreground">Triage Result</h3>
@@ -153,10 +153,10 @@ export default function TriagePage() {
                 </div>
               </div>
 
-              {/* Backend Triage (Express API) */}
+              {/* Backend Triage (ML Service) */}
               <div className="bg-card rounded-xl p-6 shadow-card border border-border">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-display font-semibold text-foreground">Backend Triage (Rule Engine)</h3>
+                  <h3 className="font-display font-semibold text-foreground">Backend Triage (ML Model)</h3>
                   {isBackendLoading && (
                     <span className="text-xs text-muted-foreground">Contacting server...</span>
                   )}
@@ -167,16 +167,19 @@ export default function TriagePage() {
                 {backendResult && (
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">
-                      <span className="font-medium text-foreground">Level:</span> {backendResult.level}
+                      <span className="font-medium text-foreground">Urgency:</span> {backendResult.urgency_level}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      <span className="font-medium text-foreground">Recommended Action:</span> {backendResult.action}
+                      <span className="font-medium text-foreground">Risk Score:</span> {backendResult.risk_score} / 100
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      <span className="font-medium text-foreground">Key Factors:</span> {backendResult.top_contributing_features.join(', ')}
                     </p>
                   </div>
                 )}
                 {!backendResult && !backendError && !isBackendLoading && (
                   <p className="text-sm text-muted-foreground">
-                    Submit the form to see the backend rule-based triage output.
+                    Submit the form to see the backend ML-based triage output.
                   </p>
                 )}
               </div>

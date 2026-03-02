@@ -1,23 +1,44 @@
 const express = require("express");
 const router = express.Router();
+const { predictRiskFromMl } = require("../services/mlClient");
 
-router.post("/", (req, res) => {
-  const { bp, hemoglobin, pregnant } = req.body;
+router.post("/", async (req, res) => {
+  try {
+    const {
+      age,
+      gender,
+      pregnancy,
+      systolic_bp,
+      diastolic_bp,
+      blood_sugar,
+      temperature,
+      spo2,
+      heart_rate,
+      symptoms,
+    } = req.body;
 
-  let level = "LOW";
-  let action = "Home care";
+    const mlPayload = {
+      age,
+      gender,
+      pregnancy,
+      systolic_bp,
+      diastolic_bp,
+      blood_sugar,
+      temperature,
+      spo2,
+      heart_rate,
+      symptoms: symptoms || [],
+    };
 
-  if (pregnant && bp > 140) {
-    level = "HIGH";
-    action = "Refer to PHC within 24 hours";
+    const mlResult = await predictRiskFromMl(mlPayload);
+
+    return res.json(mlResult);
+  } catch (err) {
+    console.error("Error calling ML service:", err.message);
+    return res.status(502).json({
+      error: "Failed to get risk prediction from ML service",
+    });
   }
-
-  if (hemoglobin && hemoglobin < 9) {
-    level = "HIGH";
-    action = "Immediate medical attention required";
-  }
-
-  res.json({ level, action });
 });
 
 module.exports = router;
