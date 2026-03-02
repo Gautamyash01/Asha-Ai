@@ -19,9 +19,18 @@ function runPythonPrediction(data) {
       return;
     }
     const python = process.platform === "win32" ? "python" : "python3";
-    const proc = spawn(python, [PYTHON_SCRIPT], {
-      stdio: ["pipe", "pipe", "pipe"],
-    });
+
+    let proc;
+    try {
+      proc = spawn(python, [PYTHON_SCRIPT], {
+        stdio: ["pipe", "pipe", "pipe"],
+      });
+    } catch (e) {
+      // Synchronous spawn errors (like EPERM) – fall back to heuristic
+      console.error("Failed to spawn python for risk prediction:", e);
+      resolve(null);
+      return;
+    }
     let out = "";
     let err = "";
     proc.stdout.on("data", (d) => (out += d.toString()));
@@ -110,26 +119,13 @@ function fallbackHeuristic(data) {
  * Predict risk using ML (or fallback). Input must include all required features.
  */
 async function predictRisk(data) {
-  const ruleResult = await runPythonPrediction({
-    age: data.age ?? 30,
-    gender: data.gender ?? "female",
-    pregnant: !!data.pregnant,
-    systolicBP: data.systolicBP ?? 120,
-    diastolicBP: data.diastolicBP ?? 80,
-    bloodSugar: data.bloodSugar ?? 100,
-    temperature: data.temperature ?? 37,
-    spo2: data.spo2 ?? 97,
-    heartRate: data.heartRate ?? 80,
-    fever: data.fever ?? data.symptoms?.includes?.("fever"),
-    cough: data.cough ?? data.symptoms?.includes?.("cough"),
-    breathlessness:
-      data.breathlessness ?? data.symptoms?.includes?.("breathlessness"),
-    symptomDuration: data.symptomDuration ?? 1,
-  });
+  // NOTE: On some Windows environments spawning python can fail with EPERM.
+  // To keep the app stable, we currently rely on the heuristic-only path.
+  // If you want to use the Python model, remove the early return and ensure
+  // that spawning python works on your system.
+  // const ruleResult = await runPythonPrediction({ ... });
+  // if (ruleResult && !ruleResult.error) return ruleResult;
 
-  if (ruleResult && !ruleResult.error) {
-    return ruleResult;
-  }
   return fallbackHeuristic(data);
 }
 

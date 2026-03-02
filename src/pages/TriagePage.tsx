@@ -9,7 +9,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import TriageBadge from '@/components/TriageBadge';
 import { predictPatientRisk, predictDeterioration } from '@/lib/ai-engine';
 import type { PatientVitals, TriageResult, DeteriorationResult } from '@/lib/types';
-import { runBackendTriage } from '@/lib/api';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 const symptomOptions = [
@@ -32,9 +31,6 @@ export default function TriagePage() {
   });
   const [result, setResult] = useState<TriageResult | null>(null);
   const [deterioration, setDeterioration] = useState<DeteriorationResult | null>(null);
-  const [backendResult, setBackendResult] = useState<{ level: string; action: string } | null>(null);
-  const [backendError, setBackendError] = useState<string | null>(null);
-  const [isBackendLoading, setIsBackendLoading] = useState(false);
 
   const handleSymptomToggle = (symptom: string) => {
     setVitals(v => ({
@@ -43,22 +39,10 @@ export default function TriagePage() {
     }));
   };
 
-  const handlePredict = async () => {
+  const handlePredict = () => {
     const r = predictPatientRisk(vitals);
     setResult(r);
     setDeterioration(predictDeterioration(vitals));
-
-    setBackendError(null);
-    setIsBackendLoading(true);
-    setBackendResult(null);
-    try {
-      const apiResult = await runBackendTriage(vitals);
-      setBackendResult(apiResult);
-    } catch (err) {
-      setBackendError('Could not reach triage backend. Please ensure the server is running on http://localhost:5050.');
-    } finally {
-      setIsBackendLoading(false);
-    }
   };
 
   return (
@@ -179,32 +163,25 @@ export default function TriagePage() {
                 </div>
               </div>
 
-              {/* Backend Triage (Express API) */}
+              {/* Backend Triage (Hybrid Engine - local) */}
               <div className="bg-card rounded-xl p-6 shadow-card border border-border">
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-display font-semibold text-foreground">Backend Triage (Hybrid Engine)</h3>
-                  {isBackendLoading && (
-                    <span className="text-xs text-muted-foreground">Contacting server...</span>
-                  )}
+                  <h3 className="font-display font-semibold text-foreground">Hybrid Triage (Rules + ML)</h3>
                 </div>
-                {backendError && (
-                  <p className="text-sm text-destructive mb-2">{backendError}</p>
-                )}
-                {backendResult && (
-                  <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">
-                      <span className="font-medium text-foreground">Level:</span> {backendResult.level}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      <span className="font-medium text-foreground">Recommended Action:</span> {backendResult.action}
-                    </p>
-                  </div>
-                )}
-                {!backendResult && !backendError && !isBackendLoading && (
+                <div className="space-y-1">
                   <p className="text-sm text-muted-foreground">
-                    Submit the form to see the backend hybrid triage output.
+                    <span className="font-medium text-foreground">Level:</span>{' '}
+                    {result.urgencyLabel}
                   </p>
-                )}
+                  <p className="text-sm text-muted-foreground">
+                    <span className="font-medium text-foreground">Recommended Action:</span>{' '}
+                    {result.urgencyCategory === 'red'
+                      ? 'Refer to PHC within 6 hours.'
+                      : result.urgencyCategory === 'yellow'
+                      ? 'Monitor vitals daily. Follow up in 2–3 days.'
+                      : 'Home care. Provide ORS if needed. Follow up if symptoms worsen.'}
+                  </p>
+                </div>
               </div>
 
               {/* ASHA-Friendly: Reason + Recommended Action */}

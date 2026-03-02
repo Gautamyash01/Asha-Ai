@@ -5,7 +5,7 @@ Trains RandomForestClassifier for patient risk prediction.
 Run: python train_risk_model.py
 Output: risk_model.pkl in server/models/
 """
-
+import pandas as pd
 import os
 import sys
 import json
@@ -31,6 +31,37 @@ FEATURES = [
     "temperature", "spo2", "heartRate", "fever", "cough", "breathlessness",
     "symptomDuration"
 ]
+
+
+def load_dataset_from_csv(csv_path: Path):
+    df = pd.read_csv(csv_path)
+
+    # gender in heart/ASHA-ready dataset is 0=female, 1=male
+    gf = (df["gender"] == 0).astype(float)
+    gm = (df["gender"] == 1).astype(float)
+    go = 1.0 - gf - gm
+
+    X = np.column_stack([
+        df["age"].values,
+        gf.values,
+        gm.values,
+        go.values,
+        df["pregnant"].astype(float).values,
+        df["systolicBP"].values,
+        df["diastolicBP"].values,
+        df["bloodSugar"].values,
+        df["temperature"].values,
+        df["spo2"].values,
+        df["heartRate"].values,
+        df["fever"].astype(float).values,
+        df["cough"].astype(float).values,
+        df["breathlessness"].astype(float).values,
+        df["symptomDuration"].values,
+    ])
+
+    y = df["label"].astype(int).values
+    return X, y
+
 
 def generate_training_data(n_samples=2000):
     """Generate synthetic training data for demonstration."""
@@ -89,8 +120,13 @@ def main():
     scaler_path = models_dir / "risk_scaler.pkl"
     meta_path = models_dir / "risk_meta.json"
 
-    print("Generating training data...")
-    X, y = generate_training_data(3000)
+    data_path = script_dir.parent / "data" / "asha_ready_dataset.csv"
+    if data_path.exists():
+        print(f"Loading training data from {data_path} ...")
+        X, y = load_dataset_from_csv(data_path)
+    else:
+        print("No asha_ready_dataset.csv found. Generating synthetic training data...")
+        X, y = generate_training_data(3000)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
