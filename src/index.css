@@ -1,0 +1,122 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 20% 97%;
+    --foreground: 200 25% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 200 25% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 200 25% 12%;
+
+    --primary: 174 62% 32%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 35 80% 55%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 40 15% 92%;
+    --muted-foreground: 200 10% 45%;
+
+    --accent: 174 40% 90%;
+    --accent-foreground: 174 62% 22%;
+
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 200 15% 88%;
+    --input: 200 15% 88%;
+    --ring: 174 62% 32%;
+
+    --radius: 0.75rem;
+
+    /* Custom tokens */
+    --triage-red: 0 80% 50%;
+    --triage-yellow: 40 95% 50%;
+    --triage-green: 145 60% 40%;
+    --triage-red-bg: 0 80% 95%;
+    --triage-yellow-bg: 40 95% 93%;
+    --triage-green-bg: 145 60% 93%;
+
+    --gradient-primary: linear-gradient(135deg, hsl(174 62% 32%), hsl(174 50% 42%));
+    --gradient-warm: linear-gradient(135deg, hsl(35 80% 55%), hsl(25 85% 50%));
+    --gradient-danger: linear-gradient(135deg, hsl(0 72% 50%), hsl(15 80% 55%));
+    --gradient-hero: linear-gradient(160deg, hsl(174 62% 28%), hsl(200 50% 20%));
+
+    --shadow-card: 0 1px 3px hsl(200 25% 12% / 0.06), 0 4px 12px hsl(200 25% 12% / 0.04);
+    --shadow-elevated: 0 4px 16px hsl(200 25% 12% / 0.08), 0 8px 32px hsl(200 25% 12% / 0.04);
+
+    --sidebar-background: 200 20% 14%;
+    --sidebar-foreground: 40 15% 92%;
+    --sidebar-primary: 174 62% 42%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 200 15% 20%;
+    --sidebar-accent-foreground: 40 15% 92%;
+    --sidebar-border: 200 15% 22%;
+    --sidebar-ring: 174 62% 42%;
+
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+  h1, h2, h3, h4, h5 {
+    font-family: var(--font-display);
+  }
+}
+
+@layer utilities {
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+  .gradient-warm {
+    background: var(--gradient-warm);
+  }
+  .gradient-danger {
+    background: var(--gradient-danger);
+  }
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+  .shadow-elevated {
+    box-shadow: var(--shadow-elevated);
+  }
+  .triage-red {
+    background-color: hsl(var(--triage-red));
+    color: white;
+  }
+  .triage-yellow {
+    background-color: hsl(var(--triage-yellow));
+    color: hsl(var(--foreground));
+  }
+  .triage-green {
+    background-color: hsl(var(--triage-green));
+    color: white;
+  }
+  .triage-red-bg {
+    background-color: hsl(var(--triage-red-bg));
+  }
+  .triage-yellow-bg {
+    background-color: hsl(var(--triage-yellow-bg));
+  }
+  .triage-green-bg {
+    background-color: hsl(var(--triage-green-bg));
+  }
+}
